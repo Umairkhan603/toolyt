@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}YouTube to Shorts Converter - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-8 space-y-10">
+    <!-- Hero Header -->
+    <div class="text-center space-y-3">
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> Instant YouTube to Shorts
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+            Convert Long YouTube Videos into <span class="text-red-600">9:16 Shorts</span>
+        </h1>
+        <p class="text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
+            Paste any YouTube video link. We automatically download the video, detect the best highlights, crop to vertical 9:16 format, add viral subtitles, and generate high-quality MP4 shorts.
+        </p>
+    </div>
+
+    <!-- Main Converter Form Card -->
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border-2 border-gray-200 shadow-xl space-y-6">
+        <form method="post" action="{% url 'home' %}" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- YouTube URL Input -->
+            <div class="space-y-2">
+                <label for="youtube_url" class="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                    YouTube Video URL
+                </label>
+                <div class="relative flex items-center">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-red-600">
+                        <i data-lucide="youtube" class="w-6 h-6"></i>
+                    </div>
+                    <input
+                        type="url"
+                        id="youtube_url"
+                        name="youtube_url"
+                        required
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                        class="w-full pl-13 pr-24 py-4 border-2 border-gray-200 rounded-2xl text-sm sm:text-base focus:border-red-500 focus:ring-4 focus:ring-red-100 transition shadow-inner font-medium"
+                        style="padding-left: 3.25rem;"
+                    >
+                    <button
+                        type="button"
+                        onclick="pasteClipboard()"
+                        class="absolute right-2.5 px-3 py-2 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition"
+                    >
+                        Paste
+                    </button>
+                </div>
+            </div>
+
+            <!-- Configuration Options -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <!-- Number of Shorts (Highlights) -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 inline mr-1 text-red-600"></i>
+                        Number of Shorts
+                    </label>
+                    <select name="clip_count" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-red-500">
+                        <option value="5" selected>5 Shorts (Top Highlights)</option>
+                        <option value="3">3 Shorts (Quick Top 3)</option>
+                        <option value="7">7 Shorts (Extended Highlights)</option>
+                        <option value="10">10 Shorts (Maximum Clips)</option>
+                        <option value="1">1 Short (Single Highlight)</option>
+                    </select>
+                </div>
+
+                <!-- Shorts Duration -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Shorts Duration</label>
+                    <select name="clip_duration" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500">
+                        <option value="30" selected>30 Seconds (Recommended)</option>
+                        <option value="15">15 Seconds (Quick Bite)</option>
+                        <option value="60">60 Seconds (Full Short)</option>
+                    </select>
+                </div>
+
+                <!-- Framing Mode -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Vertical Framing (9:16)</label>
+                    <select name="crop_mode" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500">
+                        <option value="blur" selected>Blurred Ambient Background</option>
+                        <option value="center">Center Crop (Full Screen)</option>
+                        <option value="fit">Fit with Black Bars</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Intelligent Highlights Note -->
+            <div class="bg-red-50/60 p-3.5 rounded-2xl border border-red-100 text-xs text-gray-700 flex items-start space-x-2.5">
+                <i data-lucide="sparkles" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <span class="font-bold text-gray-900">Smart Highlights & Informative Moments:</span>
+                    <span class="text-gray-600">The app automatically scans the long video using viewer engagement heatmaps and chapter topics to extract the most informative, viral parts as separate Shorts.</span>
+                </div>
+            </div>
+
+            <!-- Anti-Copyright Transformative Shield Option -->
+            <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <input
+                        type="checkbox"
+                        id="anti_copyright_enabled"
+                        name="anti_copyright_enabled"
+                        checked
+                        class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                    >
+                    <label for="anti_copyright_enabled" class="text-xs font-bold text-gray-900 cursor-pointer">
+                        <span class="inline-flex items-center text-emerald-700 font-extrabold mr-1">
+                            <i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i> Content-ID & Copyright Protection
+                        </span>
+                        <span class="block text-[11px] font-normal text-gray-600">Alters audio tempo & frequency EQ, applies color grading, sharpening, and 9:16 framing to avoid automated copyright detection.</span>
+                    </label>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 bg-emerald-200/80 text-emerald-800 rounded-lg whitespace-nowrap">
+                    Active (Safe)
+                </span>
+            </div>
+
+            <!-- Optional Background Music Track -->
+            <div class="p-4 bg-purple-50/70 rounded-2xl border border-purple-100 space-y-2">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="music" class="w-4 h-4 text-purple-600"></i>
+                    <label for="bg_music_url" class="text-xs font-bold text-gray-900">
+                        Custom Background Music Link <span class="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input
+                        type="url"
+                        id="bg_music_url"
+                        name="bg_music_url"
+                        placeholder="Paste YouTube audio link or background music URL (optional)"
+                        class="flex-grow px-3.5 py-2 text-xs border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-purple-500"
+                    >
+                    <select name="bg_music_volume" class="w-full sm:w-44 px-3 py-2 text-xs border border-gray-300 rounded-xl bg-white font-medium">
+                        <option value="0.10">Soft Volume (10%)</option>
+                        <option value="0.15" selected>Soft Volume (15% Default)</option>
+                        <option value="0.25">Medium Volume (25%)</option>
+                    </select>
+                </div>
+                <p class="text-[11px] text-gray-500">If provided, this music will be softly mixed in the background behind the video's main speech.</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                class="w-full py-4 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-base sm:text-lg shadow-lg hover:shadow-red-500/30 transition transform active:scale-[0.99] flex items-center justify-center space-x-3 cursor-pointer"
+            >
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                <span>Convert to YouTube Shorts</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Quick 3-Step Process -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center pt-4">
+        <div class="bg-white p-5 rounded-2xl border border-gray-200">
+            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+                1
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">Paste YouTube Link</h3>
+            <p class="text-xs text-gray-500 mt-1">Paste any public long-form video link. No registration needed.</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-200">
+            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+                2
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">Auto 9:16 Formatting</h3>
+            <p class="text-xs text-gray-500 mt-1">Video is processed at 1080x1920 with high-quality vertical framing.</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-200">
+            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+                3
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">Download Short MP4</h3>
+            <p class="text-xs text-gray-500 mt-1">Preview in mobile player and download directly with one click.</p>
+        </div>
+    </div>
+
+    <!-- Recent Converted Shorts Gallery -->
+    {% if recent_shorts %}
+    <div class="space-y-4 pt-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-900">Recent Generated Shorts</h2>
+            <a href="{% url 'exports:list' %}" class="text-xs font-semibold text-red-600 hover:text-red-800">Browse All &rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {% for clip in recent_shorts %}
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col group">
+                <div class="relative bg-black aspect-[9/16] flex items-center justify-center overflow-hidden">
+                    {% if clip.thumbnail %}
+                    <img src="{{ clip.thumbnail.url }}" alt="Short" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    {% else %}
+                    <div class="text-gray-400 text-xs">Preview</div>
+                    {% endif %}
+                    <span class="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] font-mono px-1.5 py-0.5 rounded">
+                        {{ clip.formatted_duration }}
+                    </span>
+                </div>
+                <div class="p-2.5 flex flex-col justify-between flex-grow space-y-2">
+                    <p class="text-xs font-semibold text-gray-900 truncate" title="{{ clip.job.video_source.title }}">{{ clip.job.video_source.title }}</p>
+                    <div class="flex items-center space-x-1">
+                        <a href="{% url 'exports:detail' clip_id=clip.id %}" class="flex-1 text-center py-1 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50">
+                            Play
+                        </a>
+                        <a href="{% url 'exports:download' clip_id=clip.id %}" class="flex-1 text-center py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-semibold">
+                            Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function pasteClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+            document.getElementById('youtube_url').value = text;
+        }
+    } catch (err) {
+        console.log("Clipboard read not permitted: ", err);
+    }
+}
+</script>
+{% endblock %}

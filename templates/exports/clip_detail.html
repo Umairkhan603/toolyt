@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Short #{{ clip.id }} - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-6 space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Short Clip #{{ clip.id }}</h1>
+            <p class="text-xs text-gray-500 mt-1">Source: <span class="font-semibold">{{ clip.job.video_source.title }}</span></p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'exports:download' clip_id=clip.id %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Download MP4
+            </a>
+            <a href="{% url 'exports:delete' clip_id=clip.id %}" class="inline-flex items-center px-3 py-2 border border-gray-300 hover:bg-red-50 hover:text-red-700 text-gray-700 rounded-lg text-xs font-medium transition">
+                <i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Delete
+            </a>
+        </div>
+    </div>
+
+    <!-- 9:16 Vertical Video Player -->
+    <div class="flex justify-center">
+        <div class="bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-gray-800 w-[340px] aspect-[9/16]">
+            {% if clip.output_file %}
+            <video controls autoplay loop class="w-full h-full object-cover">
+                <source src="{{ clip.output_file.url }}" type="video/mp4">
+                Your browser does not support HTML5 video.
+            </video>
+            {% else %}
+            <div class="flex items-center justify-center h-full text-gray-500 text-xs">Video file missing</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metadata Details Card -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+        <h3 class="text-sm font-bold text-gray-900 mb-3">Clip Specifications</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl">
+                <span class="text-gray-400 block">Aspect Ratio</span>
+                <span class="font-bold text-gray-800 mt-1 block">9:16 (Vertical)</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl">
+                <span class="text-gray-400 block">Resolution</span>
+                <span class="font-bold text-gray-800 mt-1 block">{{ clip.width }}x{{ clip.height }}</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl">
+                <span class="text-gray-400 block">Duration</span>
+                <span class="font-bold text-gray-800 mt-1 block">{{ clip.formatted_duration }}</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl">
+                <span class="text-gray-400 block">File Size</span>
+                <span class="font-bold text-gray-800 mt-1 block">{{ clip.file_size_mb }} MB</span>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t text-xs text-gray-500 flex justify-between">
+            <span>Encoding: H.264 / AAC (yuv420p)</span>
+            <span>Created: {{ clip.created_at|date:"M d, Y H:i:s" }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

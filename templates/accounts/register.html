@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12">
+    <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Create your account</h2>
+            <p class="text-xs text-gray-500 mt-1">Start repurposing your authorized long-form content</p>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200">
+                Please correct the errors below.
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">{{ field.label }}</label>
+                <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.name }}" value="{{ field.value|default:'' }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                {% if field.help_text %}
+                <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                <p class="text-xs text-red-600 mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="text-xs text-gray-500 py-2">
+                By registering, you agree to our <a href="{% url 'terms' %}" class="text-red-600 hover:underline">Terms of Use</a> and <a href="{% url 'copyright' %}" class="text-red-600 hover:underline">Copyright Policy</a>.
+            </div>
+
+            <button type="submit" class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-sm transition text-sm">
+                Create Account
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs text-gray-500 border-t pt-4">
+            Already have an account? <a href="{% url 'accounts:login' %}" class="text-red-600 hover:underline font-medium">Log In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Generated Shorts - Toolyt{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Generated Shorts</h1>
+            <p class="text-xs text-gray-500 mt-1">High-quality 9:16 vertical clips ready for YouTube Shorts</p>
+        </div>
+        <a href="{% url 'home' %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+            <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Create New Short
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        {% for clip in clips %}
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between group">
+            <div class="relative bg-black aspect-[9/16] flex items-center justify-center overflow-hidden">
+                {% if clip.thumbnail %}
+                <img src="{{ clip.thumbnail.url }}" alt="Short Preview" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                {% else %}
+                <div class="text-gray-400 text-xs">Video Preview</div>
+                {% endif %}
+                <span class="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] font-mono font-semibold px-2 py-0.5 rounded">
+                    {{ clip.formatted_duration }}
+                </span>
+            </div>
+
+            <div class="p-3 flex flex-col justify-between flex-grow space-y-2">
+                <div class="truncate">
+                    <p class="text-xs font-bold text-gray-900 truncate" title="{{ clip.job.video_source.title }}">{{ clip.job.video_source.title }}</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">{{ clip.width }}x{{ clip.height }} &bull; {{ clip.file_size_mb }} MB</p>
+                </div>
+                <div class="flex items-center space-x-1.5 pt-1">
+                    <a href="{% url 'exports:detail' clip_id=clip.id %}" class="flex-1 text-center py-1.5 px-2 border border-gray-300 hover:bg-gray-50 rounded-lg text-xs font-medium text-gray-700">
+                        View
+                    </a>
+                    <a href="{% url 'exports:download' clip_id=clip.id %}" class="flex-1 text-center py-1.5 px-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm">
+                        Save
+                    </a>
+                    <a href="{% url 'exports:delete' clip_id=clip.id %}" class="p-1.5 text-gray-400 hover:text-red-600">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full bg-white p-12 rounded-2xl border border-gray-200 text-center text-gray-400">
+            <i data-lucide="scissors" class="w-12 h-12 mx-auto text-gray-300 mb-3"></i>
+            <p class="text-sm font-medium text-gray-700">No generated shorts yet</p>
+            <p class="text-xs text-gray-400 mt-1 mb-4">Go to your videos and convert a segment into vertical format.</p>
+            <a href="{% url 'videos:list' %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                View My Videos
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ video.title }} - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ video.title }}</h1>
+            <p class="text-xs text-gray-500 mt-1">Uploaded {{ video.created_at|date:"M d, Y H:i" }} &bull; Source: {{ video.get_source_type_display }}</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            {% if video.status == 'ready' %}
+            <a href="{% url 'processing:create_job' video_id=video.id %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                <i data-lucide="scissors" class="w-4 h-4 mr-1.5"></i> Convert to Shorts
+            </a>
+            {% endif %}
+            <a href="{% url 'videos:delete' video_id=video.id %}" class="inline-flex items-center px-3 py-2 border border-gray-300 hover:bg-red-50 hover:text-red-700 text-gray-700 rounded-lg text-xs font-medium transition">
+                <i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Delete Video
+            </a>
+        </div>
+    </div>
+
+    <!-- Video Player Preview if file is ready -->
+    <div class="bg-black rounded-2xl overflow-hidden aspect-video flex items-center justify-center max-h-[480px]">
+        {% if video.original_file %}
+        <video controls class="w-full h-full object-contain">
+            <source src="{{ video.original_file.url }}" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+        {% else %}
+        <div class="text-gray-400 text-xs">Video preview unavailable</div>
+        {% endif %}
+    </div>
+
+    <!-- Metadata Details -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+        <h2 class="text-base font-bold text-gray-900 mb-4">FFprobe Media Metadata</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="text-gray-500 block">Status</span>
+                <span class="font-bold text-gray-900 mt-1 block uppercase">{{ video.get_status_display }}</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="text-gray-500 block">Duration</span>
+                <span class="font-bold text-gray-900 mt-1 block">{{ video.formatted_duration }} ({{ video.duration|default:'0'|floatformat:1 }}s)</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="text-gray-500 block">Resolution</span>
+                <span class="font-bold text-gray-900 mt-1 block">{{ video.formatted_resolution }}</span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <span class="text-gray-500 block">File Size</span>
+                <span class="font-bold text-gray-900 mt-1 block">{{ video.file_size_mb }} MB</span>
+            </div>
+        </div>
+
+        {% if video.error_message %}
+        <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+            <strong>Error Details:</strong> {{ video.error_message }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

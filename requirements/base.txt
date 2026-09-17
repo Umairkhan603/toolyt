@@ -1,0 +1,7 @@
+Django>=5.0,<5.2
+djangorestframework>=3.14.0
+celery>=5.3.6
+redis>=5.0.1
+Pillow>=10.2.0
+python-dotenv>=1.0.1
+requests>=2.31.0

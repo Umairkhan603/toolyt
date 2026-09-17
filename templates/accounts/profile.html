@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings & Quota - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 space-y-8">
+    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Account Profile</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-gray-500">Username:</span>
+                <span class="font-medium text-gray-900 ml-2">{{ user.username }}</span>
+            </div>
+            <div>
+                <span class="text-gray-500">Email:</span>
+                <span class="font-medium text-gray-900 ml-2">{{ user.email|default:'None' }}</span>
+            </div>
+            <div>
+                <span class="text-gray-500">Member Since:</span>
+                <span class="font-medium text-gray-900 ml-2">{{ user.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Quota -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900 mb-2">Storage Quota</h2>
+        <p class="text-xs text-gray-500 mb-4">Quota includes active source videos and generated short clips.</p>
+
+        <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+            <div class="bg-red-600 h-3 rounded-full transition-all" style="width: {{ profile.get_usage_percentage }}%"></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-600">
+            <span>{{ profile.get_used_storage_mb }} MB used</span>
+            <span>{{ profile.get_usage_percentage }}% of {{ profile.get_quota_mb }} MB</span>
+        </div>
+    </div>
+
+    <!-- Audit Event Log -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Audit Activity</h2>
+        <p class="text-xs text-gray-500 mb-4">Compliance audit trail of actions performed on this account.</p>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-xs">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-gray-500 uppercase tracking-wider font-semibold">
+                        <th class="py-2.5 px-3">Date & Time</th>
+                        <th class="py-2.5 px-3">Event</th>
+                        <th class="py-2.5 px-3">IP Address</th>
+                        <th class="py-2.5 px-3">Metadata</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for audit in recent_audits %}
+                    <tr>
+                        <td class="py-2.5 px-3 whitespace-nowrap text-gray-600">{{ audit.created_at|date:"Y-m-d H:i:s" }}</td>
+                        <td class="py-2.5 px-3 whitespace-nowrap font-medium text-gray-900">{{ audit.event_type }}</td>
+                        <td class="py-2.5 px-3 whitespace-nowrap text-gray-500">{{ audit.ip_address|default:'-' }}</td>
+                        <td class="py-2.5 px-3 text-gray-500 max-w-xs truncate">{{ audit.metadata }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-gray-400">No audit events recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Processing Job #{{ job.id }} - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Conversion Job #{{ job.id }}</h1>
+            <p class="text-xs text-gray-500 mt-1">Source: <span class="font-semibold">{{ video.title }}</span></p>
+        </div>
+        <div class="flex items-center space-x-3">
+            {% if job.status == 'pending' or job.status == 'processing' %}
+            <form method="post" action="{% url 'processing:cancel_job' job_id=job.id %}">
+                {% csrf_token %}
+                <button type="submit" class="px-3 py-1.5 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold">
+                    Cancel Job
+                </button>
+            </form>
+            {% elif job.status == 'failed' or job.status == 'cancelled' %}
+            <form method="post" action="{% url 'processing:retry_job' job_id=job.id %}">
+                {% csrf_token %}
+                <button type="submit" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm">
+                    Retry Job
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'home' %}" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-semibold flex items-center">
+                <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Convert Another Video
+            </a>
+        </div>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span id="jobStatusBadge" class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold {% if job.status == 'completed' %}bg-green-100 text-green-800{% elif job.status == 'failed' %}bg-red-100 text-red-800{% elif job.status == 'cancelled' %}bg-gray-100 text-gray-700{% else %}bg-blue-100 text-blue-800 animate-pulse{% endif %}">
+                    {{ job.get_status_display }}
+                </span>
+                <span id="jobStatusText" class="text-xs text-gray-600 font-medium">
+                    {% if job.status_message %}{{ job.status_message }}{% elif job.status == 'completed' %}Shorts are ready to watch and download!{% elif job.status == 'processing' %}Processing highlights...{% elif job.status == 'failed' %}Processing encountered an error{% else %}In queue...{% endif %}
+                </span>
+            </div>
+            <span id="jobProgressPct" class="text-sm font-bold text-gray-700">{{ job.progress }}%</span>
+        </div>
+
+        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div id="jobProgressBar" class="h-3 rounded-full transition-all duration-500 {% if job.status == 'completed' %}bg-green-500{% elif job.status == 'failed' %}bg-red-500{% else %}bg-red-600{% endif %}" style="width: {{ job.progress }}%"></div>
+        </div>
+
+        <div id="jobErrorBox" class="{% if not job.error_message %}hidden{% endif %} p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+            <strong>Error:</strong> <span id="jobErrorMessage">{{ job.error_message }}</span>
+        </div>
+
+        <!-- Job parameters -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t text-xs text-gray-500">
+            <div>
+                <span class="block text-gray-400">Target Duration</span>
+                <span class="font-semibold text-gray-800">{{ job.clip_duration }}s</span>
+            </div>
+            <div>
+                <span class="block text-gray-400">Crop Mode</span>
+                <span class="font-semibold text-gray-800">{{ job.get_crop_mode_display }}</span>
+            </div>
+            <div>
+                <span class="block text-gray-400">Subtitles</span>
+                <span class="font-semibold text-gray-800">{% if job.caption_enabled %}Yes ({{ job.caption_style }}){% else %}None{% endif %}</span>
+            </div>
+            <div>
+                <span class="block text-gray-400">Created At</span>
+                <span class="font-semibold text-gray-800">{{ job.created_at|date:"H:i:s" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resulting Clips Section -->
+    <div id="clipsSection" class="space-y-4">
+        {% for clip in clips %}
+        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-xl flex flex-col md:flex-row items-center gap-8">
+            <!-- 9:16 Video Player -->
+            <div class="w-[280px] sm:w-[320px] aspect-[9/16] bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-gray-900 flex-shrink-0">
+                {% if clip.output_file %}
+                <video controls preload="metadata" class="w-full h-full object-cover">
+                    <source src="{{ clip.output_file.url }}" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+                {% endif %}
+            </div>
+
+            <!-- Details & Actions -->
+            <div class="flex-grow space-y-5 text-center md:text-left">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2 justify-center md:justify-start">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-red-600 text-white shadow-sm">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> Short #{{ forloop.counter }} of {{ clips|length }}
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-gray-500"></i> {{ clip.start_time|floatformat:0 }}s - {{ clip.end_time|floatformat:0 }}s
+                        </span>
+                        {% if job.anti_copyright_enabled %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i> Anti-Copyright Protected
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">{{ job.video_source.title }}</h2>
+                    <p class="text-xs text-gray-500 mt-1">High-engagement viral highlight formatted for YouTube Shorts, Instagram Reels, and TikTok</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div>
+                        <span class="text-gray-400 block">Resolution</span>
+                        <span class="font-bold text-gray-800">{{ clip.width }}x{{ clip.height }} (9:16)</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block">Duration</span>
+                        <span class="font-bold text-gray-800">{{ clip.formatted_duration }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block">File Size</span>
+                        <span class="font-bold text-gray-800">{{ clip.file_size_mb }} MB</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block">Format</span>
+                        <span class="font-bold text-gray-800">MP4 (H.264/AAC)</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <a href="{% url 'exports:download' clip_id=clip.id %}" class="py-3.5 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-center shadow-lg transition flex items-center justify-center space-x-2">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        <span>Download Short (MP4)</span>
+                    </a>
+                    <a href="{% url 'home' %}" class="py-3.5 px-6 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-xl text-center transition flex items-center justify-center">
+                        Convert Another
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        {% if job.status == 'pending' or job.status == 'processing' %}
+        <div class="bg-white p-12 rounded-3xl border border-gray-200 text-center text-gray-400 text-xs flex flex-col items-center justify-center space-y-3 shadow-sm">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 animate-spin">
+                <i data-lucide="loader" class="w-6 h-6"></i>
+            </div>
+            <p class="text-base font-bold text-gray-800">Converting YouTube video to Shorts...</p>
+            <p class="text-gray-500 max-w-sm">Downloading video stream, framing to 9:16 vertical, and adding captions. This screen updates automatically.</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const jobId = {{ job.id }};
+    const isCompleted = {% if job.status == 'completed' or job.status == 'failed' or job.status == 'cancelled' %}true{% else %}false{% endif %};
+
+    if (!isCompleted) {
+        const intervalId = setInterval(async () => {
+            try {
+                const response = await fetch(`/processing/jobs/${jobId}/status/`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                // Update progress bar & text
+                document.getElementById('jobProgressPct').innerText = data.progress + '%';
+                document.getElementById('jobProgressBar').style.width = data.progress + '%';
+                document.getElementById('jobStatusBadge').innerText = data.status_display;
+                if (data.status_message) {
+                    document.getElementById('jobStatusText').innerText = data.status_message;
+                }
+
+                if (data.completed) {
+                    clearInterval(intervalId);
+                    if (data.status === 'completed') {
+                        document.getElementById('jobStatusBadge').className = 'inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800';
+                        document.getElementById('jobProgressBar').className = 'h-3 rounded-full bg-green-500';
+                        document.getElementById('jobStatusText').innerText = 'Conversion completed!';
+                        // Reload page to display full clip preview
+                        setTimeout(() => window.location.reload(), 800);
+                    } else if (data.status === 'failed') {
+                        document.getElementById('jobStatusBadge').className = 'inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800';
+                        document.getElementById('jobProgressBar').className = 'h-3 rounded-full bg-red-500';
+                        document.getElementById('jobErrorBox').classList.remove('hidden');
+                        document.getElementById('jobErrorMessage').innerText = data.error_message || 'Video processing failed.';
+                    }
+                }
+            } catch (err) {
+                console.error("Status check failed", err);
+            }
+        }, 2000);
+    }
+</script>
+{% endblock %}

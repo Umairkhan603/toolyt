@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Short - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-4 space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Create Vertical Short</h1>
+            <p class="text-xs text-gray-500 mt-1">Transform <span class="font-semibold">{{ video.title }}</span> into high-converting 9:16 vertical video</p>
+        </div>
+        <a href="{% url 'videos:detail' video_id=video.id %}" class="text-xs text-gray-500 hover:text-gray-800 flex items-center">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Video
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Video Preview & Timing Tool -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Original Video Preview</h3>
+                <div class="bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+                    {% if video.original_file %}
+                    <video id="previewVideo" controls class="w-full h-full object-contain">
+                        <source src="{{ video.original_file.url }}" type="video/mp4">
+                    </video>
+                    {% endif %}
+                </div>
+                <div class="mt-3 text-[11px] text-gray-500 flex justify-between">
+                    <span>Duration: {{ video.formatted_duration }}</span>
+                    <button type="button" onclick="setStartFromCurrentTime()" class="text-red-600 hover:underline font-semibold">
+                        Set current time as start
+                    </button>
+                </div>
+            </div>
+
+            <!-- Framing Preview Illustration -->
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm text-xs text-gray-600">
+                <h4 class="font-bold text-gray-900 mb-2">Aspect Ratio & Framing</h4>
+                <p class="text-[11px] leading-relaxed">The system will generate an export formatted at <strong>1080x1920 (9:16)</strong> with H.264 video and AAC audio ready for YouTube Shorts and TikTok.</p>
+            </div>
+        </div>
+
+        <!-- Configuration Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Duration Presets -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Short Duration</label>
+                        {{ form.clip_duration }}
+                        <p class="text-[11px] text-gray-400 mt-1">Recommended for YouTube Shorts: 15s to 60s</p>
+                    </div>
+
+                    <!-- Timestamps -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Start Time (Seconds)</label>
+                            {{ form.start_time }}
+                            {% if form.start_time.errors %}
+                            <p class="text-xs text-red-600 mt-1">{{ form.start_time.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">End Time (Optional)</label>
+                            {{ form.end_time }}
+                            {% if form.end_time.errors %}
+                            <p class="text-xs text-red-600 mt-1">{{ form.end_time.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Crop Mode -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Vertical Crop Mode (9:16)</label>
+                        {{ form.crop_mode }}
+                        <p class="text-[11px] text-gray-400 mt-1">Center Crop fills the frame. Blurred background fits the video with ambient blur backdrop.</p>
+                    </div>
+
+                    <!-- Captions Section -->
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label for="id_caption_enabled" class="text-xs font-bold text-gray-900 cursor-pointer">Generate Subtitles / Captions</label>
+                                <p class="text-[11px] text-gray-500">Automatically transcribe speech and burn high-contrast subtitles.</p>
+                            </div>
+                            <input id="id_caption_enabled" name="caption_enabled" type="checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        </div>
+                        <div id="captionStyleWrapper" class="pt-2">
+                            <label class="block text-[11px] font-semibold text-gray-700 uppercase mb-1">Subtitle Style</label>
+                            {{ form.caption_style }}
+                        </div>
+                    </div>
+
+                    <!-- Watermark & Branding -->
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label for="id_watermark_enabled" class="text-xs font-bold text-gray-900 cursor-pointer">Add Handle / Watermark</label>
+                                <p class="text-[11px] text-gray-500">Overlay your channel handle or watermark text on the bottom margin.</p>
+                            </div>
+                            <input id="id_watermark_enabled" name="watermark_enabled" type="checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        </div>
+                        <div id="watermarkWrapper" class="pt-2">
+                            <label class="block text-[11px] font-semibold text-gray-700 uppercase mb-1">Watermark Text</label>
+                            {{ form.watermark_text }}
+                        </div>
+                    </div>
+
+                    <!-- Audio Volume -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Audio Volume Multiplier</label>
+                        {{ form.audio_volume }}
+                        <p class="text-[11px] text-gray-400 mt-1">Default 1.0 (unchanged), or boost up to 2.0</p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-md transition text-sm flex items-center justify-center space-x-2">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span>Queue Shorts Conversion</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setStartFromCurrentTime() {
+    const video = document.getElementById('previewVideo');
+    const startInput = document.getElementById('id_start_time');
+    if (video && startInput) {
+        startInput.value = Math.floor(video.currentTime * 10) / 10;
+    }
+}
+</script>
+{% endblock %}

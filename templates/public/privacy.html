@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - Toolyt{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-8 bg-white p-8 rounded-2xl border border-gray-200">
+    <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Privacy Policy</h1>
+    
+    <div class="prose text-sm text-gray-600 space-y-4 leading-relaxed">
+        <p><strong>Last Updated:</strong> September 2026</p>
+
+        <h2 class="text-lg font-bold text-gray-900">1. Information We Collect</h2>
+        <p>We collect essential information required to operate the service: account credentials (username, email), IP addresses for security audit logs, and media files submitted for processing.</p>
+
+        <h2 class="text-lg font-bold text-gray-900">2. How Media is Handled</h2>
+        <p>Uploaded video files and generated clips are stored in isolated user directories. Files are processed exclusively for fulfilling your requested conversion jobs and are not shared with third parties or used for model training without consent.</p>
+
+        <h2 class="text-lg font-bold text-gray-900">3. Data Deletion</h2>
+        <p>You have full control over your media. When you delete a video or generated clip in the dashboard, the corresponding files on disk are permanently removed.</p>
+
+        <h2 class="text-lg font-bold text-gray-900">4. Audit Logs</h2>
+        <p>We maintain an immutable log of critical actions (login, video upload, rights confirmation, clip download, file deletion) to ensure platform integrity and compliance with digital rights policies.</p>
+    </div>
+</div>
+{% endblock %}

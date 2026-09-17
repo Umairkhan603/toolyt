@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Toolyt - YouTube Shorts Converter{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex flex-col min-h-full text-gray-800 antialiased">
+    <!-- Navigation Bar -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                        <div class="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
+                            ▶
+                        </div>
+                        <span class="font-extrabold text-xl tracking-tight text-gray-900">Toolyt <span class="text-xs font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700">Shorts</span></span>
+                    </a>
+                    <nav class="hidden md:flex space-x-6 ml-8">
+                        <a href="{% url 'home' %}" class="text-sm font-medium {% if request.path == '/' %}text-red-600 font-semibold{% else %}text-gray-600 hover:text-gray-900{% endif %}">Create Shorts</a>
+                        <a href="{% url 'exports:list' %}" class="text-sm font-medium {% if 'clips' in request.path %}text-red-600 font-semibold{% else %}text-gray-600 hover:text-gray-900{% endif %}">Shorts Gallery</a>
+                        <a href="{% url 'features' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Features</a>
+                    </nav>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'home' %}" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition">
+                        <i data-lucide="scissors" class="w-4 h-4 mr-2"></i> Paste YouTube Link
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Compliance Banner -->
+    <div class="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-xs text-amber-900">
+        <span class="font-semibold">Notice:</span> Transformative editing does not automatically grant permission to use copyrighted material. Verify ownership, licensing, and platform rules before publishing.
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% for message in messages %}
+        <div class="p-4 mb-3 rounded-lg border flex items-center justify-between {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+            <span class="text-sm">{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-700 font-bold">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 space-y-4 md:space-y-0">
+            <div>
+                <p>&copy; 2026 Toolyt Shorts Converter. Designed for rights-respecting video creators.</p>
+                <p class="text-gray-400 mt-1">This tool does not evade platform detection or bypass copyright enforcement.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="{% url 'terms' %}" class="hover:text-gray-900">Terms of Use</a>
+                <a href="{% url 'privacy' %}" class="hover:text-gray-900">Privacy Policy</a>
+                <a href="{% url 'copyright' %}" class="hover:text-gray-900">Copyright & DMCA</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
