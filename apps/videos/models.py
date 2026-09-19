@@ -4,11 +4,16 @@ from django.contrib.auth.models import User
 from .validators import validate_video_file_extension, validate_video_file_size
 
 
+import uuid
+
+
 def video_upload_path(instance, filename):
     from .validators import sanitize_filename
     clean = sanitize_filename(filename)
     user_id = instance.user_id or 'public'
-    return f"videos/{user_id}/{clean}"
+    uid = uuid.uuid4().hex[:10]
+    return f"videos/{user_id}/{uid}_{clean}"
+
 
 
 class VideoSource(models.Model):

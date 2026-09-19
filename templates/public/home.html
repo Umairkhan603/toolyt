@@ -84,25 +84,50 @@
         <!-- Decorative glow -->
         <div class="absolute -inset-1 bg-gradient-to-r from-red-500/10 via-transparent to-rose-500/10 rounded-[28px] blur-xl -z-10"></div>
 
-        <form method="post" action="{% url 'home' %}" class="space-y-5 sm:space-y-6" id="converterForm">
+        <form method="post" action="{% url 'home' %}" enctype="multipart/form-data" class="space-y-5 sm:space-y-6" id="converterForm">
             {% csrf_token %}
 
-            <!-- YouTube URL Input -->
-            <div class="space-y-1.5 sm:space-y-2">
+            <!-- Input Mode Tabs: Link vs Upload -->
+            <div class="flex items-center p-1 bg-gray-100 rounded-2xl border border-gray-200 text-xs font-bold">
+                <button
+                    type="button"
+                    id="tabLinkBtn"
+                    onclick="switchTab('link')"
+                    class="flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all bg-white text-red-600 shadow-sm cursor-pointer"
+                >
+                    <i data-lucide="link" class="w-4 h-4"></i>
+                    <span>Paste Video Link</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 hidden sm:inline">YouTube, TikTok, IG, FB</span>
+                </button>
+                <button
+                    type="button"
+                    id="tabUploadBtn"
+                    onclick="switchTab('upload')"
+                    class="flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all text-gray-600 hover:text-gray-900 cursor-pointer"
+                >
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                    <span>Upload Video File</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 hidden sm:inline">MP4, MOV, MKV</span>
+                </button>
+            </div>
+
+            <input type="hidden" name="input_mode" id="inputMode" value="link">
+
+            <!-- Section 1: Video URL Input -->
+            <div id="linkInputSection" class="space-y-1.5 sm:space-y-2">
                 <label for="youtube_url" class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-700">
-                    <i data-lucide="link" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
-                    YouTube Video URL
+                    <i data-lucide="globe" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
+                    Video Link (YouTube, TikTok, Instagram Reels, Facebook, MP4 URL)
                 </label>
                 <div class="relative flex items-center group">
                     <div class="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none text-red-500 transition-transform group-focus-within:scale-110">
-                        <i data-lucide="youtube" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                        <i data-lucide="video" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </div>
                     <input
                         type="url"
                         id="youtube_url"
                         name="youtube_url"
-                        required
-                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                        placeholder="Paste YouTube, TikTok, Instagram, or direct video URL..."
                         class="w-full pl-11 sm:pl-13 pr-20 sm:pr-24 py-3.5 sm:py-4 border-2 border-gray-200 rounded-2xl text-xs sm:text-base focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all shadow-inner font-medium bg-white/95"
                     >
                     <button
@@ -115,7 +140,51 @@
                         <span>Paste</span>
                     </button>
                 </div>
+                <p class="text-[11px] text-gray-500 px-1">
+                    Supports YouTube Videos & Shorts, TikTok, Instagram Reels, Facebook Videos, Vimeo, and direct video links.
+                </p>
             </div>
+
+            <!-- Section 2: Direct Video File Upload -->
+            <div id="uploadInputSection" class="space-y-1.5 sm:space-y-2 hidden">
+                <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-700">
+                    <i data-lucide="hard-drive-download" class="w-3.5 h-3.5 inline mr-1 text-emerald-500"></i>
+                    Select Video from Your Computer or Phone
+                </label>
+                <div
+                    id="dropZone"
+                    onclick="document.getElementById('video_file').click()"
+                    class="border-2 border-dashed border-gray-300 hover:border-red-500 hover:bg-red-50/20 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-gray-50/50"
+                >
+                    <input
+                        type="file"
+                        id="video_file"
+                        name="video_file"
+                        accept="video/mp4,video/quicktime,video/x-matroska,video/webm,video/avi"
+                        class="hidden"
+                        onchange="handleFileSelected(this)"
+                    >
+                    <div class="space-y-2">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                        </div>
+                        <div id="fileUploadPrompt">
+                            <p class="text-xs sm:text-sm font-bold text-gray-800">
+                                Click to select a video, or drag and drop here
+                            </p>
+                            <p class="text-[11px] text-gray-500 mt-1">
+                                MP4, MOV, MKV, WebM up to 500 MB (Full bypass — no YouTube bot blocks)
+                            </p>
+                        </div>
+                        <div id="fileUploadSelected" class="hidden text-xs font-semibold text-emerald-700 bg-emerald-50 py-2 px-4 rounded-xl inline-flex items-center gap-2 border border-emerald-200">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                            <span id="selectedFileName">video.mp4</span>
+                            <span id="selectedFileSize" class="text-gray-500 text-[10px]"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- Configuration Options Grid (Responsive: 1 col on mobile, 3 cols on sm+) -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1 sm:pt-2">
@@ -369,6 +438,65 @@
 
 {% block extra_js %}
 <script>
+function switchTab(mode) {
+    const isLink = mode === 'link';
+    document.getElementById('inputMode').value = mode;
+
+    // Toggle sections
+    document.getElementById('linkInputSection').classList.toggle('hidden', !isLink);
+    document.getElementById('uploadInputSection').classList.toggle('hidden', isLink);
+
+    // Toggle button styles
+    const linkBtn = document.getElementById('tabLinkBtn');
+    const uploadBtn = document.getElementById('tabUploadBtn');
+
+    if (isLink) {
+        linkBtn.className = 'flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all bg-white text-red-600 shadow-sm cursor-pointer';
+        uploadBtn.className = 'flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all text-gray-600 hover:text-gray-900 cursor-pointer';
+    } else {
+        uploadBtn.className = 'flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all bg-white text-emerald-600 shadow-sm cursor-pointer';
+        linkBtn.className = 'flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all text-gray-600 hover:text-gray-900 cursor-pointer';
+    }
+}
+
+function handleFileSelected(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        document.getElementById('selectedFileName').innerText = file.name;
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+        document.getElementById('selectedFileSize').innerText = `(${sizeMb} MB)`;
+        document.getElementById('fileUploadPrompt').classList.add('hidden');
+        document.getElementById('fileUploadSelected').classList.remove('hidden');
+    }
+}
+
+// Drag & drop support
+const dropZone = document.getElementById('dropZone');
+if (dropZone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-red-500', 'bg-red-50/40');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-red-500', 'bg-red-50/40');
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt.files && dt.files.length) {
+            const fileInput = document.getElementById('video_file');
+            fileInput.files = dt.files;
+            handleFileSelected(fileInput);
+        }
+    }, false);
+}
+
 async function pasteClipboard() {
     try {
         const text = await navigator.clipboard.readText();
@@ -377,20 +505,37 @@ async function pasteClipboard() {
             document.getElementById('youtube_url').focus();
         }
     } catch (err) {
-        // Fallback: focus the input for manual paste
         document.getElementById('youtube_url').focus();
     }
 }
 
-// Prevent double-submit
+// Form submission validation
 document.getElementById('converterForm').addEventListener('submit', function(e) {
+    const mode = document.getElementById('inputMode').value;
+    const url = (document.getElementById('youtube_url').value || '').trim();
+    const fileInput = document.getElementById('video_file');
+    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+    if (mode === 'link' && !url) {
+        e.preventDefault();
+        alert('Please enter a video URL.');
+        document.getElementById('youtube_url').focus();
+        return;
+    }
+
+    if (mode === 'upload' && !hasFile) {
+        e.preventDefault();
+        alert('Please select a video file to upload.');
+        return;
+    }
+
     const btn = document.getElementById('convertBtn');
     if (btn.dataset.submitted) {
         e.preventDefault();
         return;
     }
     btn.dataset.submitted = 'true';
-    btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Processing...';
+    btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> ' + (mode === 'upload' ? 'Uploading & Processing...' : 'Processing Video...');
     btn.classList.add('opacity-75', 'cursor-not-allowed');
 });
 </script>

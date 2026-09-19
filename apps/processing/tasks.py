@@ -49,14 +49,20 @@ def process_video_job_task(self, job_id: int):
     try:
         # Step 1: Detect Highlights & Metadata
         highlights = []
-        if source.source_url and YouTubeDownloaderService.is_youtube_url(source.source_url):
+        if source.source_url:
+            # Clean YouTube URLs to remove playlist and radio mix params
+            clean_url = YouTubeDownloaderService.clean_youtube_url(source.source_url)
+            if clean_url != source.source_url:
+                source.source_url = clean_url
+                source.save(update_fields=['source_url'])
+
             try:
-                job.update_progress(10, "Extracting video metadata and audience heatmap...")
-                yt_meta = YouTubeDownloaderService.extract_info(source.source_url)
-                if not source.title:
-                    source.title = yt_meta.get('title', 'YouTube Video')
-                if not source.duration and yt_meta.get('duration'):
-                    source.duration = float(yt_meta.get('duration'))
+                job.update_progress(10, "Extracting video metadata and highlights...")
+                meta_info = YouTubeDownloaderService.extract_info(source.source_url)
+                if not source.title or source.title in ("YouTube Video", "Imported Video"):
+                    source.title = meta_info.get('title', 'Imported Video')
+                if not source.duration and meta_info.get('duration'):
+                    source.duration = float(meta_info.get('duration'))
                 source.save(update_fields=['title', 'duration'])
 
                 if num_clips == 1 and job.start_time > 0:
@@ -69,7 +75,7 @@ def process_video_job_task(self, job_id: int):
                     }]
                 else:
                     highlights = HighlightDetectorService.detect_highlights(
-                        yt_meta,
+                        meta_info,
                         clip_duration=clip_duration,
                         clip_count=num_clips
                     )
@@ -80,20 +86,20 @@ def process_video_job_task(self, job_id: int):
         source_local_path = None
         if source.original_file and hasattr(source.original_file, 'path') and os.path.exists(source.original_file.path) and os.path.getsize(source.original_file.path) > 1000:
             source_local_path = source.original_file.path
-        elif source.source_url and YouTubeDownloaderService.is_youtube_url(source.source_url):
+        elif source.source_url:
             job.update_progress(20, "Downloading source video stream at high speed (720p)...")
-            yt_clip_info = YouTubeDownloaderService.download_video(
+            clip_info = YouTubeDownloaderService.download_video(
                 source.source_url,
                 scratch_dir
             )
-            downloaded_path = yt_clip_info['file_path']
+            downloaded_path = clip_info['file_path']
             if os.path.exists(downloaded_path):
                 fn = os.path.basename(downloaded_path)
                 with open(downloaded_path, 'rb') as f:
                     source.original_file.save(fn, File(f), save=False)
-                source.duration = yt_clip_info.get('duration', source.duration)
-                source.width = yt_clip_info.get('width', 1280)
-                source.height = yt_clip_info.get('height', 720)
+                source.duration = clip_info.get('duration', source.duration)
+                source.width = clip_info.get('width', 1280)
+                source.height = clip_info.get('height', 720)
                 source.status = VideoSource.STATUS_READY
                 source.save()
                 source_local_path = source.original_file.path

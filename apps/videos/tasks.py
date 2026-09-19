@@ -39,15 +39,23 @@ def validate_source_task(self, video_source_id: int):
 
             temp_dir = tempfile.mkdtemp()
 
-            if YouTubeDownloaderService.is_youtube_url(source.source_url):
-                yt_info = YouTubeDownloaderService.download_video(source.source_url, temp_dir)
-                local_path = yt_info['file_path']
+            # Normalize YouTube URL to strip playlist/mix parameters
+            clean_url = YouTubeDownloaderService.clean_youtube_url(source.source_url)
+            if clean_url != source.source_url:
+                source.source_url = clean_url
+                source.save(update_fields=['source_url'])
+
+            try:
+                # Use robust yt-dlp downloader for all supported video platforms
+                clip_info = YouTubeDownloaderService.download_video(source.source_url, temp_dir)
+                local_path = clip_info['file_path']
                 target_filename = os.path.basename(local_path)
                 if not source.title or source.title == "Imported Video":
-                    source.title = yt_info.get('title', '')
+                    source.title = clip_info.get('title', '') or "Imported Video"
                 with open(local_path, 'rb') as f:
                     source.original_file.save(target_filename, File(f), save=False)
-            else:
+            except Exception as dl_err:
+                logger.warning(f"yt-dlp download failed, falling back to direct HTTP stream: {dl_err}")
                 target_filename = sanitize_filename(os.path.basename(source.source_url.split('?')[0]) or "imported_video.mp4")
                 if not any(target_filename.endswith(ext) for ext in ['.mp4', '.mov', '.avi', '.mkv', '.webm']):
                     target_filename += ".mp4"
@@ -67,6 +75,7 @@ def validate_source_task(self, video_source_id: int):
 
                 with open(local_path, 'rb') as f:
                     source.original_file.save(target_filename, File(f), save=False)
+
 
             # Cleanup temp file
             try:

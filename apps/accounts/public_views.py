@@ -18,17 +18,49 @@ from apps.videos.validators import is_safe_url
 
 def home_view(request):
     if request.method == 'POST':
-        youtube_url = request.POST.get('youtube_url', '').strip()
-        if not youtube_url:
-            messages.error(request, "Please enter a valid YouTube video URL.")
+        video_file = request.FILES.get('video_file')
+        raw_url = (request.POST.get('video_url') or request.POST.get('youtube_url') or '').strip()
+
+        if not video_file and not raw_url:
+            messages.error(request, "Please enter a video link or upload a video file.")
             return redirect('home')
 
-        # Check if valid and safe YouTube or video URL
-        if not (YouTubeDownloaderService.is_youtube_url(youtube_url) and is_safe_url(youtube_url)):
-            messages.error(request, "Please provide a valid public YouTube URL (e.g., https://www.youtube.com/watch?v=... or https://youtu.be/...)")
-            return redirect('home')
+        source = None
 
+        if video_file:
+            from apps.videos.validators import validate_video_file_extension, validate_video_file_size
+            from django.core.exceptions import ValidationError
+            try:
+                validate_video_file_extension(video_file)
+                validate_video_file_size(video_file)
+            except ValidationError as ve:
+                messages.error(request, str(ve.message if hasattr(ve, 'message') else ve))
+                return redirect('home')
 
+            source = VideoSource.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                source_type=VideoSource.SOURCE_UPLOAD,
+                original_file=video_file,
+                title=video_file.name,
+                file_size=video_file.size,
+                rights_confirmed=True,
+                status=VideoSource.STATUS_PENDING
+            )
+        else:
+            # Clean and normalize YouTube URL to remove playlist/mix contamination
+            clean_url = YouTubeDownloaderService.clean_youtube_url(raw_url)
+            if not is_safe_url(clean_url):
+                messages.error(request, "Please provide a valid public video link (YouTube, TikTok, Instagram, Facebook, or direct video URL).")
+                return redirect('home')
+
+            source = VideoSource.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                source_type=VideoSource.SOURCE_URL,
+                source_url=clean_url,
+                title="Imported Video",
+                rights_confirmed=True,
+                status=VideoSource.STATUS_PENDING
+            )
 
         try:
             clip_duration = int(request.POST.get('clip_duration', 30))
@@ -59,17 +91,6 @@ def home_view(request):
         watermark_text = request.POST.get('watermark_text', '').strip()
         anti_copyright_enabled = request.POST.get('anti_copyright_enabled', 'on') in ('on', 'true', '1', True)
 
-
-        # Create source and processing job
-        source = VideoSource.objects.create(
-            user=request.user if request.user.is_authenticated else None,
-            source_type=VideoSource.SOURCE_URL,
-            source_url=youtube_url,
-            title="YouTube Video",
-            rights_confirmed=True,
-            status=VideoSource.STATUS_PENDING
-        )
-
         job = ProcessingJob.objects.create(
             user=request.user if request.user.is_authenticated else None,
             video_source=source,
@@ -88,9 +109,14 @@ def home_view(request):
 
         record_audit_event(
             user=request.user if request.user.is_authenticated else None,
-            event_type='youtube.convert_requested',
+            event_type='video.convert_requested',
             request=request,
-            metadata={'job_id': job.id, 'youtube_url': youtube_url, 'start_time': start_time}
+            metadata={
+                'job_id': job.id,
+                'source_type': source.source_type,
+                'video_url': source.source_url or '',
+                'start_time': start_time
+            }
         )
 
         # Trigger conversion task in background thread so the HTTP view redirects immediately
@@ -99,7 +125,7 @@ def home_view(request):
         task_thread.start()
         task_thread.join(timeout=0.05)
 
-        messages.success(request, "YouTube conversion started! Converting your video to 9:16 Shorts...")
+        messages.success(request, "Conversion started! Converting your video to 9:16 Shorts...")
         return redirect('processing:job_detail', job_id=job.id)
 
     # GET request

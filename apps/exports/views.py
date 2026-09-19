@@ -54,9 +54,13 @@ def clip_download_view(request, clip_id: int):
     )
 
     response = FileResponse(open(clip.output_file.path, 'rb'), content_type='video/mp4')
-    filename = f"short_{clip.id}.mp4"
+    from django.utils.text import slugify
+    video_title = getattr(clip.job.video_source, 'title', '') or 'short'
+    slug_title = slugify(video_title)[:35] or 'short'
+    filename = f"{slug_title}_{clip.id}.mp4"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
 
 
 def clip_delete_view(request, clip_id: int):

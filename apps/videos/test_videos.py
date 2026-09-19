@@ -185,3 +185,73 @@ class VideosTestCase(TestCase):
         self.assertEqual(hl_short[0]['start_time'], 0.0)
         self.assertEqual(hl_short[0]['end_time'], 60.0)
 
+    def test_clean_youtube_url_strips_playlists_and_mixes(self):
+        from apps.videos.services.youtube import YouTubeDownloaderService
+        # Playlist URL
+        clean1 = YouTubeDownloaderService.clean_youtube_url(
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&index=1&t=45s"
+        )
+        self.assertEqual(clean1, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+
+        # Short URL with params
+        clean2 = YouTubeDownloaderService.clean_youtube_url(
+            "https://youtu.be/dQw4w9WgXcQ?si=abcdef123456&list=PL12345"
+        )
+        self.assertEqual(clean2, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+
+        # Shorts URL
+        clean3 = YouTubeDownloaderService.clean_youtube_url(
+            "https://www.youtube.com/shorts/dQw4w9WgXcQ?feature=share"
+        )
+        self.assertEqual(clean3, "https://www.youtube.com/shorts/dQw4w9WgXcQ")
+
+        # Non-YouTube URL stays as is
+        clean4 = YouTubeDownloaderService.clean_youtube_url(
+            "https://www.tiktok.com/@user/video/1234567890"
+        )
+        self.assertEqual(clean4, "https://www.tiktok.com/@user/video/1234567890")
+
+    def test_youtube_downloader_opts_include_mobile_clients(self):
+        from apps.videos.services.youtube import YouTubeDownloaderService
+        opts = YouTubeDownloaderService._get_base_opts()
+        self.assertIn('extractor_args', opts)
+        self.assertIn('youtube', opts['extractor_args'])
+        clients = opts['extractor_args']['youtube']['player_client']
+        self.assertIn('android', clients)
+        self.assertIn('ios', clients)
+        self.assertTrue(opts.get('noplaylist'))
+
+    def test_home_direct_file_upload(self):
+        from unittest.mock import patch
+        guest_client = Client()
+        dummy_video = SimpleUploadedFile("sample_upload.mp4", b"\x00\x00\x00\x18ftypmp42" + b"A" * 500, content_type="video/mp4")
+
+        with patch('apps.processing.tasks.process_video_job_task.delay') as mock_delay:
+            res = guest_client.post('/', {
+                'video_file': dummy_video,
+                'clip_count': '3',
+                'clip_duration': '30',
+                'crop_mode': 'blur',
+                'caption_enabled': 'off',
+            })
+            self.assertEqual(res.status_code, 302)
+            self.assertTrue(res.url.startswith('/processing/jobs/'))
+            mock_delay.assert_called_once()
+
+            # Verify VideoSource created with upload type
+            source = VideoSource.objects.filter(source_type=VideoSource.SOURCE_UPLOAD).first()
+            self.assertIsNotNone(source)
+            self.assertEqual(source.title, "sample_upload.mp4")
+
+    def test_video_upload_path_has_unique_uuid(self):
+        from apps.videos.models import video_upload_path
+        class DummyInstance:
+            user_id = 42
+
+        path1 = video_upload_path(DummyInstance(), "video.mp4")
+        path2 = video_upload_path(DummyInstance(), "video.mp4")
+        self.assertNotEqual(path1, path2)
+        self.assertIn("videos/42/", path1)
+        self.assertTrue(path1.endswith("_video.mp4"))
+
+
