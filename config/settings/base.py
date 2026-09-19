@@ -136,8 +136,4 @@ ALLOWED_MIME_TYPES = [
 FFMPEG_PATH = os.getenv('FFMPEG_PATH', 'ffmpeg')
 FFPROBE_PATH = os.getenv('FFPROBE_PATH', 'ffprobe')
 
-# YouTube & Video Downloader Configuration (VPS & Production Hardening)
-YOUTUBE_COOKIES_PATH = os.getenv('YOUTUBE_COOKIES_PATH', '')
-YOUTUBE_COOKIES_CONTENT = os.getenv('YOUTUBE_COOKIES_CONTENT', '')
-YOUTUBE_PROXY = os.getenv('YOUTUBE_PROXY', '')
 

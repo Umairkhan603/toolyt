@@ -226,9 +226,9 @@ class FFmpegService:
         args = [
             cls.get_ffmpeg_bin(),
             '-y',
+            '-i', input_path,
             '-ss', str(max(0.0, start_time)),
             '-t', str(max(1.0, duration)),
-            '-i', input_path,
         ]
 
         args.extend([

@@ -49,8 +49,18 @@
             <div id="jobProgressBar" class="h-3 rounded-full transition-all duration-500 {% if job.status == 'completed' %}bg-green-500{% elif job.status == 'failed' %}bg-red-500{% else %}bg-red-600{% endif %}" style="width: {{ job.progress }}%"></div>
         </div>
 
-        <div id="jobErrorBox" class="{% if not job.error_message %}hidden{% endif %} p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
-            <strong>Error:</strong> <span id="jobErrorMessage">{{ job.error_message }}</span>
+        <div id="jobErrorBox" class="{% if not job.error_message %}hidden{% endif %} p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 space-y-3">
+            <div>
+                <strong>Error:</strong> <span id="jobErrorMessage">{{ job.error_message }}</span>
+            </div>
+            <div id="jobUploadHint" class="{% if 'bot protection' not in job.error_message|default:'' and 'cannot download YouTube' not in job.error_message|default:'' %}hidden{% endif %} p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs">
+                <p class="font-semibold mb-2">💡 Quick Fix: Upload your video directly</p>
+                <p class="mb-3">YouTube is blocking automatic downloads from this server. You can easily work around this by downloading the video to your device first, then uploading it here.</p>
+                <a href="{% url 'home' %}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg text-xs shadow-sm transition">
+                    <i data-lucide="upload" class="w-4 h-4 mr-1.5"></i>
+                    Upload Video Directly
+                </a>
+            </div>
         </div>
 
         <!-- Job parameters -->
@@ -185,7 +195,13 @@
                         document.getElementById('jobStatusBadge').className = 'inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800';
                         document.getElementById('jobProgressBar').className = 'h-3 rounded-full bg-red-500';
                         document.getElementById('jobErrorBox').classList.remove('hidden');
-                        document.getElementById('jobErrorMessage').innerText = data.error_message || 'Video processing failed.';
+                        const errMsg = data.error_message || 'Video processing failed.';
+                        document.getElementById('jobErrorMessage').innerText = errMsg;
+                        // Show upload hint for bot-protection errors
+                        const hint = document.getElementById('jobUploadHint');
+                        if (hint && (errMsg.toLowerCase().includes('bot protection') || errMsg.toLowerCase().includes('cannot download youtube'))) {
+                            hint.classList.remove('hidden');
+                        }
                     }
                 }
             } catch (err) {

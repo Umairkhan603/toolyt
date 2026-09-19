@@ -211,15 +211,36 @@ class VideosTestCase(TestCase):
         )
         self.assertEqual(clean4, "https://www.tiktok.com/@user/video/1234567890")
 
-    def test_youtube_downloader_opts_include_mobile_clients(self):
+    def test_youtube_downloader_opts_no_bot_bypass(self):
+        """Verify _get_base_opts() does NOT contain any bot-bypass configuration."""
         from apps.videos.services.youtube import YouTubeDownloaderService
         opts = YouTubeDownloaderService._get_base_opts()
-        self.assertIn('extractor_args', opts)
-        self.assertIn('youtube', opts['extractor_args'])
-        clients = opts['extractor_args']['youtube']['player_client']
-        self.assertIn('android', clients)
-        self.assertIn('ios', clients)
+        # No mobile client extractor args
+        self.assertNotIn('extractor_args', opts)
+        # No cookies
+        self.assertNotIn('cookiefile', opts)
+        # No proxy
+        self.assertNotIn('proxy', opts)
+        # Standard options still present
         self.assertTrue(opts.get('noplaylist'))
+        self.assertEqual(opts.get('retries'), 5)
+
+    def test_bot_protection_error_detection(self):
+        """Verify _is_bot_protection_error correctly identifies bot-related errors."""
+        from apps.videos.services.youtube import YouTubeDownloaderService
+        self.assertTrue(YouTubeDownloaderService._is_bot_protection_error(
+            "Sign in to confirm you're not a bot"
+        ))
+        self.assertTrue(YouTubeDownloaderService._is_bot_protection_error(
+            "This request has been blocked due to bot detection"
+        ))
+        self.assertTrue(YouTubeDownloaderService._is_bot_protection_error(
+            "Login required to access this content"
+        ))
+        self.assertFalse(YouTubeDownloaderService._is_bot_protection_error(
+            "Video unavailable in your country"
+        ))
+        self.assertFalse(YouTubeDownloaderService._is_bot_protection_error(""))
 
     def test_home_direct_file_upload(self):
         from unittest.mock import patch
