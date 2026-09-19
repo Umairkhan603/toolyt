@@ -207,12 +207,9 @@ class FFmpegService:
         subtitle_file: Optional[str] = None,
         volume_multiplier: float = 1.0,
         anti_copyright: bool = True,
-        bg_music_path: Optional[str] = None,
-        bg_music_volume: float = 0.15,
     ) -> Dict[str, Any]:
         """
         Extract and convert a clip to 9:16 vertical MP4 (1080x1920) H.264/AAC.
-        Optionally mixes soft background music.
         """
         if not os.path.exists(input_path):
             raise VideoProcessingError(f"Source file not found: {input_path}")
@@ -226,8 +223,6 @@ class FFmpegService:
             anti_copyright=anti_copyright
         )
 
-        has_bg_music = bool(bg_music_path and os.path.exists(bg_music_path))
-
         args = [
             cls.get_ffmpeg_bin(),
             '-y',
@@ -235,9 +230,6 @@ class FFmpegService:
             '-t', str(max(1.0, duration)),
             '-i', input_path,
         ]
-
-        if has_bg_music:
-            args.extend(['-stream_loop', '-1', '-i', bg_music_path])
 
         args.extend([
             '-vf', vf,
@@ -264,15 +256,7 @@ class FFmpegService:
         if volume_multiplier != 1.0:
             main_a_filters.append(f"volume={volume_multiplier}")
 
-        if has_bg_music:
-            main_filter_str = ",".join(main_a_filters) if main_a_filters else "anull"
-            fc = (
-                f"[0:a]{main_filter_str}[main_a];"
-                f"[1:a]volume={bg_music_volume:.2f}[bg_a];"
-                f"[main_a][bg_a]amix=inputs=2:duration=first:dropout_transition=2[aout]"
-            )
-            args.extend(['-filter_complex', fc, '-map', '0:v', '-map', '[aout]'])
-        elif main_a_filters:
+        if main_a_filters:
             args.extend(['-filter:a', ",".join(main_a_filters)])
 
         args.append(output_path)

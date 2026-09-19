@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from apps.videos.models import VideoSource
 from apps.processing.models import ProcessingJob
 from apps.exports.models import GeneratedClip
@@ -11,6 +13,9 @@ from apps.processing.tasks import process_video_job_task
 from apps.audit.utils import record_audit_event
 
 
+from apps.videos.validators import is_safe_url
+
+
 def home_view(request):
     if request.method == 'POST':
         youtube_url = request.POST.get('youtube_url', '').strip()
@@ -18,13 +23,17 @@ def home_view(request):
             messages.error(request, "Please enter a valid YouTube video URL.")
             return redirect('home')
 
-        # Check if valid YouTube or video URL
-        if not (YouTubeDownloaderService.is_youtube_url(youtube_url) or youtube_url.startswith(('http://', 'https://'))):
-            messages.error(request, "Please provide a valid YouTube URL (e.g., https://www.youtube.com/watch?v=... or https://youtu.be/...)")
+        # Check if valid and safe YouTube or video URL
+        if not (YouTubeDownloaderService.is_youtube_url(youtube_url) and is_safe_url(youtube_url)):
+            messages.error(request, "Please provide a valid public YouTube URL (e.g., https://www.youtube.com/watch?v=... or https://youtu.be/...)")
             return redirect('home')
+
+
 
         try:
             clip_duration = int(request.POST.get('clip_duration', 30))
+            if clip_duration not in (15, 30, 45, 60, 90):
+                clip_duration = 30
         except (ValueError, TypeError):
             clip_duration = 30
 
@@ -50,12 +59,6 @@ def home_view(request):
         watermark_text = request.POST.get('watermark_text', '').strip()
         anti_copyright_enabled = request.POST.get('anti_copyright_enabled', 'on') in ('on', 'true', '1', True)
 
-        bg_music_url = request.POST.get('bg_music_url', '').strip()
-        try:
-            bg_music_volume = float(request.POST.get('bg_music_volume', 0.15))
-            bg_music_volume = max(0.01, min(0.50, bg_music_volume))
-        except (ValueError, TypeError):
-            bg_music_volume = 0.15
 
         # Create source and processing job
         source = VideoSource.objects.create(
@@ -79,8 +82,6 @@ def home_view(request):
             watermark_enabled=bool(watermark_text),
             watermark_text=watermark_text,
             anti_copyright_enabled=anti_copyright_enabled,
-            bg_music_url=bg_music_url,
-            bg_music_volume=bg_music_volume,
             status=ProcessingJob.STATUS_PENDING,
             progress=0
         )
@@ -158,3 +159,23 @@ def dashboard_view(request):
         'active_jobs': ProcessingJob.objects.filter(user=user, status__in=['pending', 'processing']).count(),
     }
     return render(request, 'dashboard.html', context)
+
+
+def robots_txt_view(request):
+    """Serve robots.txt dynamically with proper content type."""
+    ctx = {
+        'scheme': request.scheme,
+        'host': request.get_host(),
+    }
+    content = render_to_string('robots.txt', ctx, request=request)
+    return HttpResponse(content, content_type='text/plain')
+
+
+def sitemap_xml_view(request):
+    """Serve sitemap.xml dynamically with proper content type."""
+    ctx = {
+        'scheme': request.scheme,
+        'host': request.get_host(),
+    }
+    content = render_to_string('sitemap.xml', ctx, request=request)
+    return HttpResponse(content, content_type='application/xml')

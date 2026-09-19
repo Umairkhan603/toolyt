@@ -160,3 +160,28 @@ class VideosTestCase(TestCase):
         vf_off = FFmpegService.build_video_filter(crop_mode='center', anti_copyright=False)
         self.assertNotIn('setpts=PTS/1.03', vf_off)
 
+    def test_requested_duration_preserved_and_reduced_if_video_shorter(self):
+        from apps.videos.services.highlights import HighlightDetectorService
+
+        # Case 1: 375s video with 90s requested and 5 clips -> each clip MUST be 90s
+        highlights = HighlightDetectorService.detect_highlights(
+            {'duration': 375.0},
+            clip_duration=90.0,
+            clip_count=5
+        )
+        self.assertEqual(len(highlights), 5)
+        for h in highlights:
+            self.assertEqual(h['duration'], 90.0)
+            self.assertLessEqual(h['end_time'], 375.0)
+
+        # Case 2: 60s video with 90s requested -> duration is reduced to 60s
+        hl_short = HighlightDetectorService.detect_highlights(
+            {'duration': 60.0},
+            clip_duration=90.0,
+            clip_count=3
+        )
+        self.assertEqual(len(hl_short), 1)
+        self.assertEqual(hl_short[0]['duration'], 60.0)
+        self.assertEqual(hl_short[0]['start_time'], 0.0)
+        self.assertEqual(hl_short[0]['end_time'], 60.0)
+

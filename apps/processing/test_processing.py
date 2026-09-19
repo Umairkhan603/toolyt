@@ -213,29 +213,4 @@ class ProcessingTestCase(TestCase):
         self.assertIn("Shorts generated successfully", job.status_message)
         self.assertEqual(job.clips.count(), 2)
 
-    def test_background_music_audio_mixing(self):
-        # Generate dummy background audio file
-        bg_audio_path = os.path.join(self.test_dir, "bg_audio.mp4")
-        cmd = [
-            'ffmpeg', '-y',
-            '-f', 'lavfi', '-i', 'sine=frequency=440:duration=2',
-            '-c:a', 'aac', '-b:a', '64k',
-            bg_audio_path
-        ]
-        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-
-        out_bg_clip_path = os.path.join(self.test_dir, "out_with_bg_music.mp4")
-        meta = FFmpegService.render_clip(
-            input_path=self.video.original_file.path,
-            output_path=out_bg_clip_path,
-            start_time=0.0,
-            duration=1.0,
-            crop_mode='center',
-            bg_music_path=bg_audio_path,
-            bg_music_volume=0.15
-        )
-        self.assertEqual(meta['width'], 1080)
-        self.assertEqual(meta['height'], 1920)
-        self.assertTrue(os.path.exists(out_bg_clip_path))
-
 

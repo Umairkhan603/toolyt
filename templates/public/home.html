@@ -1,35 +1,101 @@
 {% extends 'base.html' %}
 
-{% block title %}YouTube to Shorts Converter - Toolyt{% endblock %}
+{% block title %}Toolyt - YouTube to Shorts Converter | Auto 9:16 Vertical Video Maker{% endblock %}
+
+{% block meta_seo %}
+<meta name="description" content="Convert long YouTube videos into viral 9:16 Shorts instantly. Auto-detect highlights, add captions, apply copyright protection, and download HD MP4 clips ready for YouTube Shorts, TikTok, and Instagram Reels.">
+<meta name="keywords" content="YouTube to Shorts converter, YouTube Shorts maker, 9:16 video converter, vertical video maker, TikTok video converter, Instagram Reels converter, auto captions, video highlights, clip generator, free YouTube Shorts tool">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Toolyt - YouTube to Shorts Converter | Auto 9:16 Vertical Video">
+<meta property="og:description" content="Paste any YouTube link and instantly get viral 9:16 Shorts. Auto highlights, HD captions, copyright-safe. Download MP4 for YouTube Shorts, TikTok & Reels.">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/">
+<meta property="og:site_name" content="Toolyt">
+<meta property="og:see_also" content="https://www.facebook.com/profile.php?id=61578106907145">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Toolyt - YouTube to Shorts Converter">
+<meta name="twitter:description" content="Convert long YouTube videos into viral 9:16 Shorts instantly. Auto-detect highlights, add captions & download HD MP4.">
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Toolyt",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/",
+  "description": "Convert long YouTube videos into viral 9:16 Shorts instantly with auto highlights, captions, and copyright protection.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "DevPeak Studio",
+    "email": "devpeakstudio1@gmail.com",
+    "sameAs": [
+      "https://www.facebook.com/profile.php?id=61578106907145"
+    ]
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto py-8 space-y-10">
+<div class="max-w-3xl mx-auto py-6 sm:py-12 space-y-10 sm:space-y-12 px-2 sm:px-4">
+
     <!-- Hero Header -->
-    <div class="text-center space-y-3">
-        <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> Instant YouTube to Shorts
+    <div class="text-center space-y-4 sm:space-y-5 animate-fade-in">
+        <div class="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-gradient-to-r from-red-100 to-orange-100 text-red-700 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-sm">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Free YouTube to Shorts Converter</span>
         </div>
-        <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Convert Long YouTube Videos into <span class="text-red-600">9:16 Shorts</span>
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
+            Turn YouTube Videos into
+            <span class="bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">Viral Shorts</span>
         </h1>
-        <p class="text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-            Paste any YouTube video link. We automatically download the video, detect the best highlights, crop to vertical 9:16 format, add viral subtitles, and generate high-quality MP4 shorts.
+        <p class="text-xs sm:text-base text-gray-500 max-w-xl mx-auto leading-relaxed px-2">
+            Paste any YouTube link — we auto-detect the best highlights, crop to 9:16 vertical, burn viral subtitles, and generate download-ready HD Shorts.
         </p>
+
+        <!-- Trust Badges -->
+        <div class="flex flex-wrap justify-center gap-2 sm:gap-3 pt-1">
+            <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white border border-gray-200 rounded-full text-[10px] sm:text-[11px] font-semibold text-gray-600 shadow-sm">
+                <i data-lucide="zap" class="w-3 h-3 text-amber-500"></i> Instant Processing
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white border border-gray-200 rounded-full text-[10px] sm:text-[11px] font-semibold text-gray-600 shadow-sm">
+                <i data-lucide="shield-check" class="w-3 h-3 text-emerald-500"></i> Copyright Safe
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white border border-gray-200 rounded-full text-[10px] sm:text-[11px] font-semibold text-gray-600 shadow-sm">
+                <i data-lucide="download" class="w-3 h-3 text-blue-500"></i> Free HD Download
+            </span>
+        </div>
     </div>
 
     <!-- Main Converter Form Card -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border-2 border-gray-200 shadow-xl space-y-6">
-        <form method="post" action="{% url 'home' %}" class="space-y-6">
+    <div class="relative bg-white/85 backdrop-blur-xl p-4 sm:p-8 rounded-3xl border border-gray-200/80 shadow-2xl shadow-red-500/5 space-y-5 sm:space-y-6 animate-slide-up">
+        <!-- Decorative glow -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-red-500/10 via-transparent to-rose-500/10 rounded-[28px] blur-xl -z-10"></div>
+
+        <form method="post" action="{% url 'home' %}" class="space-y-5 sm:space-y-6" id="converterForm">
             {% csrf_token %}
 
             <!-- YouTube URL Input -->
-            <div class="space-y-2">
-                <label for="youtube_url" class="block text-xs font-bold uppercase tracking-wider text-gray-700">
+            <div class="space-y-1.5 sm:space-y-2">
+                <label for="youtube_url" class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-700">
+                    <i data-lucide="link" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
                     YouTube Video URL
                 </label>
-                <div class="relative flex items-center">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-red-600">
-                        <i data-lucide="youtube" class="w-6 h-6"></i>
+                <div class="relative flex items-center group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none text-red-500 transition-transform group-focus-within:scale-110">
+                        <i data-lucide="youtube" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </div>
                     <input
                         type="url"
@@ -37,165 +103,199 @@
                         name="youtube_url"
                         required
                         placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
-                        class="w-full pl-13 pr-24 py-4 border-2 border-gray-200 rounded-2xl text-sm sm:text-base focus:border-red-500 focus:ring-4 focus:ring-red-100 transition shadow-inner font-medium"
-                        style="padding-left: 3.25rem;"
+                        class="w-full pl-11 sm:pl-13 pr-20 sm:pr-24 py-3.5 sm:py-4 border-2 border-gray-200 rounded-2xl text-xs sm:text-base focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all shadow-inner font-medium bg-white/95"
                     >
                     <button
                         type="button"
                         onclick="pasteClipboard()"
-                        class="absolute right-2.5 px-3 py-2 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition"
+                        class="absolute right-2 sm:right-2.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-700 rounded-xl transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                        aria-label="Paste URL from clipboard"
                     >
-                        Paste
+                        <i data-lucide="clipboard" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
+                        <span>Paste</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Configuration Options -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                <!-- Number of Shorts (Highlights) -->
-                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i data-lucide="layers" class="w-3.5 h-3.5 inline mr-1 text-red-600"></i>
+            <!-- Configuration Options Grid (Responsive: 1 col on mobile, 3 cols on sm+) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1 sm:pt-2">
+                <!-- Number of Shorts -->
+                <div class="bg-gradient-to-br from-gray-50 to-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 space-y-1.5 sm:space-y-2 hover:border-red-200 hover:shadow-md transition-all">
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
                         Number of Shorts
                     </label>
-                    <select name="clip_count" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-red-500">
+                    <select name="clip_count" class="w-full p-2 sm:p-2.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-red-500 cursor-pointer min-h-[42px]">
                         <option value="5" selected>5 Shorts (Top Highlights)</option>
                         <option value="3">3 Shorts (Quick Top 3)</option>
-                        <option value="7">7 Shorts (Extended Highlights)</option>
-                        <option value="10">10 Shorts (Maximum Clips)</option>
-                        <option value="1">1 Short (Single Highlight)</option>
+                        <option value="7">7 Shorts (Extended)</option>
+                        <option value="10">10 Shorts (Maximum)</option>
+                        <option value="1">1 Short (Single Clip)</option>
                     </select>
                 </div>
 
-                <!-- Shorts Duration -->
-                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Shorts Duration</label>
-                    <select name="clip_duration" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500">
-                        <option value="30" selected>30 Seconds (Recommended)</option>
-                        <option value="15">15 Seconds (Quick Bite)</option>
-                        <option value="60">60 Seconds (Full Short)</option>
+                <!-- Duration -->
+                <div class="bg-gradient-to-br from-gray-50 to-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 space-y-1.5 sm:space-y-2 hover:border-red-200 hover:shadow-md transition-all">
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i data-lucide="timer" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
+                        Shorts Duration
+                    </label>
+                    <select name="clip_duration" class="w-full p-2 sm:p-2.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-red-500 cursor-pointer min-h-[42px]">
+                        <option value="15">15s (Quick Bite)</option>
+                        <option value="30" selected>30s ★ (Recommended)</option>
+                        <option value="45">45s (Standard)</option>
+                        <option value="60">60s (Full Short)</option>
+                        <option value="90">90s (Extended)</option>
                     </select>
                 </div>
 
                 <!-- Framing Mode -->
-                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-2">
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Vertical Framing (9:16)</label>
-                    <select name="crop_mode" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500">
-                        <option value="blur" selected>Blurred Ambient Background</option>
-                        <option value="center">Center Crop (Full Screen)</option>
-                        <option value="fit">Fit with Black Bars</option>
+                <div class="bg-gradient-to-br from-gray-50 to-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 space-y-1.5 sm:space-y-2 hover:border-red-200 hover:shadow-md transition-all">
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5 inline mr-1 text-red-500"></i>
+                        Vertical Framing
+                    </label>
+                    <select name="crop_mode" class="w-full p-2 sm:p-2.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-red-500 cursor-pointer min-h-[42px]">
+                        <option value="blur" selected>Blurred Background</option>
+                        <option value="center">Center Crop</option>
+                        <option value="fit">Fit (Black Bars)</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Intelligent Highlights Note -->
-            <div class="bg-red-50/60 p-3.5 rounded-2xl border border-red-100 text-xs text-gray-700 flex items-start space-x-2.5">
-                <i data-lucide="sparkles" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
-                <div>
-                    <span class="font-bold text-gray-900">Smart Highlights & Informative Moments:</span>
-                    <span class="text-gray-600">The app automatically scans the long video using viewer engagement heatmaps and chapter topics to extract the most informative, viral parts as separate Shorts.</span>
+            <!-- Smart Highlights Info -->
+            <div class="bg-gradient-to-r from-red-50/80 to-orange-50/60 p-3.5 sm:p-4 rounded-2xl border border-red-100/80 text-xs text-gray-700 flex items-start space-x-3">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="brain" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600"></i>
+                </div>
+                <div class="leading-relaxed">
+                    <span class="font-bold text-gray-900">Smart AI Highlights:</span>
+                    <span class="text-gray-600"> Automatically scans viewer engagement heatmaps and chapters to extract the most viral, informative moments as separate Shorts.</span>
                 </div>
             </div>
 
-            <!-- Anti-Copyright Transformative Shield Option -->
-            <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <!-- Anti-Copyright Shield -->
+            <div class="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-50/80 to-green-50/60 rounded-2xl border border-emerald-200/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center space-x-3">
                     <input
                         type="checkbox"
                         id="anti_copyright_enabled"
                         name="anti_copyright_enabled"
                         checked
-                        class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                        class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer flex-shrink-0"
                     >
-                    <label for="anti_copyright_enabled" class="text-xs font-bold text-gray-900 cursor-pointer">
-                        <span class="inline-flex items-center text-emerald-700 font-extrabold mr-1">
-                            <i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i> Content-ID & Copyright Protection
+                    <label for="anti_copyright_enabled" class="cursor-pointer">
+                        <span class="flex items-center text-xs font-extrabold text-emerald-700">
+                            <i data-lucide="shield-check" class="w-4 h-4 inline mr-1.5 flex-shrink-0"></i> Content-ID & Copyright Protection
                         </span>
-                        <span class="block text-[11px] font-normal text-gray-600">Alters audio tempo & frequency EQ, applies color grading, sharpening, and 9:16 framing to avoid automated copyright detection.</span>
+                        <span class="block text-[11px] font-normal text-gray-500 mt-0.5">Alters audio tempo, frequency EQ, color grading & sharpening to avoid automated detection.</span>
                     </label>
                 </div>
-                <span class="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 bg-emerald-200/80 text-emerald-800 rounded-lg whitespace-nowrap">
+                <span class="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 bg-emerald-200/80 text-emerald-800 rounded-lg whitespace-nowrap self-start sm:self-auto">
                     Active (Safe)
                 </span>
-            </div>
-
-            <!-- Optional Background Music Track -->
-            <div class="p-4 bg-purple-50/70 rounded-2xl border border-purple-100 space-y-2">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="music" class="w-4 h-4 text-purple-600"></i>
-                    <label for="bg_music_url" class="text-xs font-bold text-gray-900">
-                        Custom Background Music Link <span class="text-gray-400 font-normal">(Optional)</span>
-                    </label>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input
-                        type="url"
-                        id="bg_music_url"
-                        name="bg_music_url"
-                        placeholder="Paste YouTube audio link or background music URL (optional)"
-                        class="flex-grow px-3.5 py-2 text-xs border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-purple-500"
-                    >
-                    <select name="bg_music_volume" class="w-full sm:w-44 px-3 py-2 text-xs border border-gray-300 rounded-xl bg-white font-medium">
-                        <option value="0.10">Soft Volume (10%)</option>
-                        <option value="0.15" selected>Soft Volume (15% Default)</option>
-                        <option value="0.25">Medium Volume (25%)</option>
-                    </select>
-                </div>
-                <p class="text-[11px] text-gray-500">If provided, this music will be softly mixed in the background behind the video's main speech.</p>
             </div>
 
             <!-- Submit Button -->
             <button
                 type="submit"
-                class="w-full py-4 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl text-base sm:text-lg shadow-lg hover:shadow-red-500/30 transition transform active:scale-[0.99] flex items-center justify-center space-x-3 cursor-pointer"
+                id="convertBtn"
+                class="w-full py-3.5 sm:py-4 px-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-2xl text-sm sm:text-lg shadow-lg hover:shadow-red-500/30 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-3 cursor-pointer group"
             >
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5 group-hover:animate-spin"></i>
                 <span>Convert to YouTube Shorts</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform"></i>
             </button>
         </form>
     </div>
 
-    <!-- Quick 3-Step Process -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center pt-4">
-        <div class="bg-white p-5 rounded-2xl border border-gray-200">
-            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+    <!-- Quick 3-Step Process (Responsive: 1 col on mobile, 3 cols on md+) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 text-center">
+        <div class="bg-white/80 backdrop-blur p-5 sm:p-6 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all group">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-red-50 to-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3.5 sm:mb-4 font-bold text-base sm:text-lg group-hover:scale-110 transition-transform shadow-sm">
                 1
             </div>
             <h3 class="text-sm font-bold text-gray-900">Paste YouTube Link</h3>
-            <p class="text-xs text-gray-500 mt-1">Paste any public long-form video link. No registration needed.</p>
+            <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">Paste any public long-form video link. No registration or login needed.</p>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-gray-200">
-            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+        <div class="bg-white/80 backdrop-blur p-5 sm:p-6 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all group">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-red-50 to-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3.5 sm:mb-4 font-bold text-base sm:text-lg group-hover:scale-110 transition-transform shadow-sm">
                 2
             </div>
-            <h3 class="text-sm font-bold text-gray-900">Auto 9:16 Formatting</h3>
-            <p class="text-xs text-gray-500 mt-1">Video is processed at 1080x1920 with high-quality vertical framing.</p>
+            <h3 class="text-sm font-bold text-gray-900">AI Auto-Processing</h3>
+            <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">Smart highlight detection, 1080×1920 9:16 vertical framing, and HD captions added automatically.</p>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-gray-200">
-            <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 font-bold text-base">
+        <div class="bg-white/80 backdrop-blur p-5 sm:p-6 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all group">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-red-50 to-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3.5 sm:mb-4 font-bold text-base sm:text-lg group-hover:scale-110 transition-transform shadow-sm">
                 3
             </div>
-            <h3 class="text-sm font-bold text-gray-900">Download Short MP4</h3>
-            <p class="text-xs text-gray-500 mt-1">Preview in mobile player and download directly with one click.</p>
+            <h3 class="text-sm font-bold text-gray-900">Download HD Shorts</h3>
+            <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">Preview in mobile player and download MP4 directly — ready to upload anywhere.</p>
         </div>
     </div>
 
-    <!-- Recent Converted Shorts Gallery -->
+    <!-- Why Creators Love Toolyt Section -->
+    <div class="space-y-4 sm:space-y-6 pt-2 sm:pt-4">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 text-center">Why Creators Love Toolyt</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            <div class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="gauge" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Lightning Fast</h4>
+                    <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">Optimized FFmpeg pipeline. Get your Shorts ready in under a minute.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="captions" class="w-4 h-4 sm:w-5 sm:h-5 text-purple-600"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Auto Viral Captions</h4>
+                    <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">Burned-in subtitles in multiple styles to boost engagement 2-3x.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="shield" class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Copyright Protection</h4>
+                    <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">Audio & video transforms to bypass automated Content-ID detection.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="monitor-smartphone" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-600"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Multi-Platform Ready</h4>
+                    <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">Optimized for YouTube Shorts, TikTok, Instagram Reels & Snapchat.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Converted Shorts Gallery (Responsive for mobile, tablet, desktop) -->
     {% if recent_shorts %}
-    <div class="space-y-4 pt-6">
-        <div class="flex justify-between items-center">
-            <h2 class="text-lg font-bold text-gray-900">Recent Generated Shorts</h2>
-            <a href="{% url 'exports:list' %}" class="text-xs font-semibold text-red-600 hover:text-red-800">Browse All &rarr;</a>
+    <div class="space-y-4 pt-2">
+        <div class="flex justify-between items-center px-1">
+            <h2 class="text-base sm:text-lg font-bold text-gray-900 flex items-center">
+                <i data-lucide="film" class="w-4 h-4 sm:w-5 sm:h-5 inline mr-1.5 text-red-500"></i>
+                Recent Generated Shorts
+            </h2>
+            <a href="{% url 'exports:list' %}" class="text-xs font-semibold text-red-600 hover:text-red-800 transition">&rarr; Browse All</a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {% for clip in recent_shorts %}
-            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col group">
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col group hover:shadow-lg hover:border-red-200 transition-all">
                 <div class="relative bg-black aspect-[9/16] flex items-center justify-center overflow-hidden">
                     {% if clip.thumbnail %}
-                    <img src="{{ clip.thumbnail.url }}" alt="Short" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <img src="{{ clip.thumbnail.url }}" alt="YouTube Short clip preview" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                     {% else %}
                     <div class="text-gray-400 text-xs">Preview</div>
                     {% endif %}
@@ -203,13 +303,13 @@
                         {{ clip.formatted_duration }}
                     </span>
                 </div>
-                <div class="p-2.5 flex flex-col justify-between flex-grow space-y-2">
+                <div class="p-2 sm:p-2.5 flex flex-col justify-between flex-grow space-y-2">
                     <p class="text-xs font-semibold text-gray-900 truncate" title="{{ clip.job.video_source.title }}">{{ clip.job.video_source.title }}</p>
                     <div class="flex items-center space-x-1">
-                        <a href="{% url 'exports:detail' clip_id=clip.id %}" class="flex-1 text-center py-1 border border-gray-200 rounded-lg text-[11px] font-medium text-gray-700 hover:bg-gray-50">
+                        <a href="{% url 'exports:detail' clip_id=clip.id %}" class="flex-1 text-center py-1 sm:py-1.5 border border-gray-200 rounded-lg text-[10px] sm:text-[11px] font-medium text-gray-700 hover:bg-gray-50 transition">
                             Play
                         </a>
-                        <a href="{% url 'exports:download' clip_id=clip.id %}" class="flex-1 text-center py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-semibold">
+                        <a href="{% url 'exports:download' clip_id=clip.id %}" class="flex-1 text-center py-1 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] sm:text-[11px] font-semibold transition">
                             Download
                         </a>
                     </div>
@@ -219,6 +319,51 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- DevPeak Studio Custom Development Banner (Responsive across all media) -->
+    <div class="relative text-center py-8 sm:py-10 px-4 sm:px-8 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(239,68,68,0.15),transparent_60%)]"></div>
+        <div class="relative space-y-4 max-w-xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[11px] font-bold text-white/80 uppercase tracking-wider">
+                <i data-lucide="code-2" class="w-3.5 h-3.5 text-red-400"></i> Custom Development
+            </div>
+            <h3 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">Want a Tool Like This for Your Business?</h3>
+            <p class="text-xs sm:text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
+                We build custom web tools, SaaS platforms, AI systems, and automation software. Connect directly with our engineering team:
+            </p>
+
+            <!-- Responsive Contact Buttons: Stacked on mobile, side-by-side on tablet/desktop -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-md mx-auto">
+                <!-- Email Contact Button -->
+                <a
+                    href="mailto:devpeakstudio1@gmail.com"
+                    class="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold rounded-xl text-xs sm:text-sm transition-all shadow-lg hover:shadow-red-500/30 active:scale-95"
+                >
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                    <span>devpeakstudio1@gmail.com</span>
+                </a>
+
+                <!-- Facebook Profile Button -->
+                <a
+                    href="https://www.facebook.com/profile.php?id=61578106907145"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold rounded-xl text-xs sm:text-sm transition-all shadow-lg hover:shadow-blue-500/30 active:scale-95"
+                    title="Connect with DevPeak Studio on Facebook"
+                    aria-label="Facebook Profile"
+                >
+                    <svg class="w-4 h-4 fill-current flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span>Connect on Facebook</span>
+                </a>
+            </div>
+
+            <p class="text-[11px] text-gray-400 pt-1">
+                Built & Maintained by <span class="text-white font-semibold">DevPeak Studio</span>
+            </p>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -229,10 +374,24 @@ async function pasteClipboard() {
         const text = await navigator.clipboard.readText();
         if (text) {
             document.getElementById('youtube_url').value = text;
+            document.getElementById('youtube_url').focus();
         }
     } catch (err) {
-        console.log("Clipboard read not permitted: ", err);
+        // Fallback: focus the input for manual paste
+        document.getElementById('youtube_url').focus();
     }
 }
+
+// Prevent double-submit
+document.getElementById('converterForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('convertBtn');
+    if (btn.dataset.submitted) {
+        e.preventDefault();
+        return;
+    }
+    btn.dataset.submitted = 'true';
+    btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Processing...';
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+});
 </script>
 {% endblock %}

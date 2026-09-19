@@ -8,6 +8,7 @@ class HighlightDetectorService:
     """
     Intelligently analyzes video metadata (YouTube heatmap, chapter markers, duration)
     to identify the most informative and engaging segments for Short generation.
+    Always respects the requested clip_duration unless the video itself is shorter.
     """
 
     @classmethod
@@ -18,20 +19,22 @@ class HighlightDetectorService:
         clip_count: int = 5
     ) -> List[Dict[str, Any]]:
         total_duration = float(video_info.get('duration') or 0.0)
+        requested_duration = max(1.0, float(clip_duration))
         if total_duration <= 0:
-            total_duration = 300.0  # Fallback 5 mins
+            total_duration = max(300.0, requested_duration)  # Fallback
 
         clip_count = max(1, min(15, clip_count))
-        effective_clip_dur = max(0.5, min(90.0, clip_duration))
+        # The target duration is the requested duration, capped only by the total video length
+        target_duration = min(requested_duration, total_duration)
 
-        # If video is shorter than clip duration and only 1 clip requested, return full video
-        if total_duration <= effective_clip_dur and clip_count == 1:
+        # If the video is shorter than or equal to the requested duration, return the full video
+        if total_duration <= requested_duration:
             return [{
                 'index': 1,
                 'title': video_info.get('title', 'Highlight #1'),
                 'start_time': 0.0,
-                'end_time': total_duration,
-                'duration': total_duration,
+                'end_time': round(total_duration, 2),
+                'duration': round(total_duration, 2),
                 'reason': 'full_video'
             }]
 
@@ -40,25 +43,25 @@ class HighlightDetectorService:
 
         # Strategy 1: Heatmap Peaks (Most Replayed Moments)
         if heatmap and len(heatmap) >= clip_count:
-            highlights = cls._detect_from_heatmap(heatmap, total_duration, clip_duration, clip_count)
+            highlights = cls._detect_from_heatmap(heatmap, total_duration, target_duration, clip_count)
             if len(highlights) >= clip_count:
                 return highlights
 
         # Strategy 2: Chapter Markers (Informative Topics)
         if chapters and len(chapters) >= 2:
-            highlights = cls._detect_from_chapters(chapters, total_duration, clip_duration, clip_count)
+            highlights = cls._detect_from_chapters(chapters, total_duration, target_duration, clip_count)
             if len(highlights) >= clip_count:
                 return highlights
 
         # Strategy 3: Distributed Informative Segments (Paced evenly through the video)
-        return cls._detect_distributed(total_duration, clip_duration, clip_count, video_info.get('title', 'Highlight'))
+        return cls._detect_distributed(total_duration, target_duration, clip_count, video_info.get('title', 'Highlight'))
 
     @classmethod
     def _detect_from_heatmap(
         cls,
         heatmap: List[Dict[str, Any]],
         total_duration: float,
-        clip_duration: float,
+        target_duration: float,
         clip_count: int
     ) -> List[Dict[str, Any]]:
         # Sort heatmap points by engagement value descending
@@ -69,18 +72,16 @@ class HighlightDetectorService:
         if not valid_points:
             return []
 
-        # Exclude initial 10 seconds if score is just initial play artifact
         sorted_points = sorted(valid_points, key=lambda x: x.get('value', 0.0), reverse=True)
 
-        min_distance = max(clip_duration * 1.5, total_duration / (clip_count * 2.5))
+        max_start = max(0.0, total_duration - target_duration)
+        min_distance = max(5.0, min(30.0, max_start / max(1, clip_count)))
         chosen_times = []
         highlights = []
 
         for pt in sorted_points:
             cand_start = float(pt.get('start_time', 0.0))
-            # Adjust if start is too close to the end
-            if cand_start + clip_duration > total_duration:
-                cand_start = max(0.0, total_duration - clip_duration)
+            cand_start = max(0.0, min(cand_start, max_start))
 
             # Check distance from existing picks to ensure variety
             if any(abs(cand_start - chosen) < min_distance for chosen in chosen_times):
@@ -93,8 +94,8 @@ class HighlightDetectorService:
                 'index': idx,
                 'title': f"Peak Moment #{idx} ({score}% Viewer Retention)",
                 'start_time': round(cand_start, 2),
-                'end_time': round(cand_start + clip_duration, 2),
-                'duration': clip_duration,
+                'end_time': round(cand_start + target_duration, 2),
+                'duration': round(target_duration, 2),
                 'reason': 'viewer_heatmap_peak',
                 'score': score
             })
@@ -114,7 +115,7 @@ class HighlightDetectorService:
         cls,
         chapters: List[Dict[str, Any]],
         total_duration: float,
-        clip_duration: float,
+        target_duration: float,
         clip_count: int
     ) -> List[Dict[str, Any]]:
         # Filter out generic or sponsor chapters
@@ -134,26 +135,23 @@ class HighlightDetectorService:
         step = max(1, len(pool) // clip_count)
         selected_chapters = [pool[i] for i in range(0, len(pool), step)][:clip_count]
 
+        max_start = max(0.0, total_duration - target_duration)
         highlights = []
         for i, ch in enumerate(selected_chapters, 1):
             ch_start = float(ch.get('start_time', 0.0))
             ch_end = float(ch.get('end_time', total_duration))
             ch_dur = max(0.0, ch_end - ch_start)
 
-            # Start 10-20% into the chapter to catch the core point rather than transition words
-            offset = min(15.0, ch_dur * 0.15) if ch_dur > (clip_duration + 15.0) else 0.0
-            clip_start = ch_start + offset
-
-            if clip_start + clip_duration > total_duration:
-                clip_start = max(0.0, total_duration - clip_duration)
+            offset = min(15.0, ch_dur * 0.15) if ch_dur > (target_duration + 15.0) else 0.0
+            clip_start = max(0.0, min(ch_start + offset, max_start))
 
             ch_title = ch.get('title', f"Highlight #{i}")
             highlights.append({
                 'index': i,
                 'title': f"Topic: {ch_title}",
                 'start_time': round(clip_start, 2),
-                'end_time': round(clip_start + clip_duration, 2),
-                'duration': clip_duration,
+                'end_time': round(clip_start + target_duration, 2),
+                'duration': round(target_duration, 2),
                 'reason': 'chapter_topic'
             })
 
@@ -163,44 +161,33 @@ class HighlightDetectorService:
     def _detect_distributed(
         cls,
         total_duration: float,
-        clip_duration: float,
+        target_duration: float,
         clip_count: int,
         base_title: str
     ) -> List[Dict[str, Any]]:
         highlights = []
-        if total_duration <= clip_duration * clip_count:
-            step = total_duration / clip_count
-            for i in range(clip_count):
-                c_start = i * step
-                c_dur = min(clip_duration, step)
-                highlights.append({
-                    'index': i + 1,
-                    'title': f"Key Highlight #{i + 1}",
-                    'start_time': round(c_start, 2),
-                    'end_time': round(c_start + c_dur, 2),
-                    'duration': round(c_dur, 2),
-                    'reason': 'paced_distribution'
-                })
-            return highlights
+        max_start = max(0.0, total_duration - target_duration)
 
-        # Safe boundary margins (skip first 5% and last 5%)
-        safe_start = total_duration * 0.05
-        safe_end = max(safe_start + clip_duration, total_duration * 0.92 - clip_duration)
-        span = safe_end - safe_start
+        if clip_count <= 1 or max_start <= 0.0:
+            return [{
+                'index': 1,
+                'title': "Key Highlight #1",
+                'start_time': 0.0,
+                'end_time': round(target_duration, 2),
+                'duration': round(target_duration, 2),
+                'reason': 'single_highlight'
+            }]
 
-        step = span / (clip_count + 1) if clip_count > 1 else span / 2
-
-        for i in range(1, clip_count + 1):
-            cand_start = safe_start + (i * step)
-            if cand_start + clip_duration > total_duration:
-                cand_start = max(0.0, total_duration - clip_duration)
-
+        # Distribute clip start times evenly across [0, max_start]
+        # Every clip will have the exact target_duration (e.g. 90s)
+        for i in range(clip_count):
+            cand_start = (i / (clip_count - 1)) * max_start
             highlights.append({
-                'index': i,
-                'title': f"Key Highlight #{i}",
+                'index': i + 1,
+                'title': f"Key Highlight #{i + 1}",
                 'start_time': round(cand_start, 2),
-                'end_time': round(cand_start + clip_duration, 2),
-                'duration': clip_duration,
+                'end_time': round(cand_start + target_duration, 2),
+                'duration': round(target_duration, 2),
                 'reason': 'paced_distribution'
             })
 

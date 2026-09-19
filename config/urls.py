@@ -37,6 +37,10 @@ urlpatterns = [
     path('privacy/', public_views.privacy_view, name='privacy'),
     path('copyright/', public_views.copyright_policy_view, name='copyright'),
 
+    # SEO
+    path('robots.txt', public_views.robots_txt_view, name='robots_txt'),
+    path('sitemap.xml', public_views.sitemap_xml_view, name='sitemap_xml'),
+
     # Authenticated UI Pages
     path('dashboard/', public_views.dashboard_view, name='dashboard'),
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),

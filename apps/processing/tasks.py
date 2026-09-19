@@ -139,24 +139,7 @@ def process_video_job_task(self, job_id: int):
             except Exception as cap_err:
                 logger.warning(f"Audio transcription failed: {cap_err}")
 
-        # Step 4: Download Optional Background Music
-        bg_music_local_path = None
-        if job.bg_music_url:
-            try:
-                job.update_progress(28, "Downloading optional background music track...")
-                music_dir = os.path.join(scratch_dir, "bg_music")
-                os.makedirs(music_dir, exist_ok=True)
-                if YouTubeDownloaderService.is_youtube_url(job.bg_music_url):
-                    m_info = YouTubeDownloaderService.download_video(job.bg_music_url, music_dir)
-                    bg_music_local_path = m_info.get('file_path')
-                else:
-                    import urllib.request
-                    m_path = os.path.join(music_dir, "music.mp3")
-                    urllib.request.urlretrieve(job.bg_music_url, m_path)
-                    if os.path.exists(m_path):
-                        bg_music_local_path = m_path
-            except Exception as bg_err:
-                logger.warning(f"Could not download background music track: {bg_err}")
+
 
         # Step 5: Fast Local FFmpeg Rendering for Each Short
         created_clips = []
@@ -209,8 +192,6 @@ def process_video_job_task(self, job_id: int):
                     subtitle_file=subtitles_file,
                     volume_multiplier=job.audio_volume,
                     anti_copyright=job.anti_copyright_enabled,
-                    bg_music_path=bg_music_local_path,
-                    bg_music_volume=float(job.bg_music_volume or 0.15)
                 )
 
                 FFmpegService.generate_thumbnail(

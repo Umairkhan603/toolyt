@@ -28,7 +28,7 @@ class ProcessingJob(models.Model):
 
     DURATION_CHOICES = (
         (15, '15 Seconds'),
-        (30, '30 Seconds'),
+        (30, '30 Seconds ★ (Recommended)'),
         (45, '45 Seconds'),
         (60, '60 Seconds'),
         (90, '90 Seconds'),
@@ -59,9 +59,6 @@ class ProcessingJob(models.Model):
     audio_volume = models.FloatField(default=1.0, help_text="Audio volume multiplier")
     anti_copyright_enabled = models.BooleanField(default=True, help_text="Transformative filters to prevent automated Content ID matches")
 
-    # Optional Background Music
-    bg_music_url = models.CharField(max_length=500, blank=True, help_text="Optional YouTube or audio link for soft background music")
-    bg_music_volume = models.FloatField(default=0.15, help_text="Background music volume (0.15 = 15% soft background music)")
 
     # Status and progress
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)

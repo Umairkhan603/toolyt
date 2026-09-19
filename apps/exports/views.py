@@ -26,10 +26,19 @@ def clip_detail_view(request, clip_id: int):
     return render(request, 'exports/clip_detail.html', {'clip': clip})
 
 
+from django.conf import settings
+
+
 def clip_download_view(request, clip_id: int):
     clip = get_object_or_404(GeneratedClip.objects.select_related('job'), id=clip_id)
 
-    if not clip.output_file or not os.path.exists(clip.output_file.path):
+    if not clip.output_file or not clip.output_file.name:
+        raise Http404("Clip file does not exist on disk.")
+
+    file_path = os.path.abspath(clip.output_file.path)
+    media_root = os.path.abspath(settings.MEDIA_ROOT)
+
+    if not file_path.startswith(media_root) or not os.path.exists(file_path):
         raise Http404("Clip file does not exist on disk.")
 
     record_audit_event(

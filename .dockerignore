@@ -1,0 +1,46 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Git
+.git/
+.github/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django local files
+db.sqlite3
+media/
+
+# Environment / secrets
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Generated video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local Docker files
+docker-compose.yml
+
+# Documentation / previews not needed in container
+homepage_preview.png
+youtube_shorts_converter_spec.md
+README.md

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /features/
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /accounts/
+Disallow: /processing/
+Disallow: /videos/
+Disallow: /media/
+
+Sitemap: {{ scheme }}://{{ host }}/sitemap.xml
